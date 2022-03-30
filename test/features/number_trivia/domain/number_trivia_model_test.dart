@@ -23,15 +23,15 @@ void main(){
     expect(result, tNumberTriviaModel);
   });
 
-  // test('Should return a valid json from model', () {
-  //   //arrange
-  //   final Map<String, dynamic> jsonMap = {
-  //     "text": 'test',
-  //     "number": 0
-  //   };
-  //   //act
-  //   final result = tNumberTriviaModel.toJson();
-  //   //assert
-  //   expect(result, tNumberTriviaModel.toJson());
-  // });
+  test('Should return a valid json from model', () {
+    //arrange
+    final Map<String, dynamic> jsonMap = {
+      "text": 'test',
+      "number": 0
+    };
+    //act
+    final result = tNumberTriviaModel.toJson();
+    //assert
+    expect(result, jsonMap);
+  });
 }
