@@ -1,3 +1,3 @@
 abstract class NetworkInfo {
-  Future<void> get isConnected;
+  Future<bool>? get isConnected;
 }

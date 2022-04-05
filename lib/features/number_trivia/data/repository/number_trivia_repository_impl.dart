@@ -17,10 +17,12 @@ class NumberTriviaRepositoryImpl implements NumberTriviaRepository {
     required this.remoteDataSource,
     required this.networkInfo,
   });
+    //if device is connected
+      //then get fresh data from remote data source
+      // otherwise get data from local data source
   @override
   Future<Either<Failure, NumberTrivia>>? getContreteNumberTrivia(int number) {
-    // TODO: implement getContreteNumberTrivia
-    throw UnimplementedError();
+    networkInfo.isConnected;
   }
 
   @override
