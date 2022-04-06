@@ -6,16 +6,14 @@ import 'package:number_trivia_app/features/number_trivia/domain/entities/number_
 import 'package:number_trivia_app/features/number_trivia/domain/repositories/number_trivia_repository.dart';
 import 'package:number_trivia_app/features/number_trivia/domain/usecases/get_random_number_trivia.dart';
 
-class MockNumberTriviaRepository extends Mock implements NumberTriviaRepository{}
+import 'get_concrete_number_trivia_test.mocks.dart';
 
 void main(){
-
-  late MockNumberTriviaRepository mockNumberTriviaRepository;
+  final MockNumberTriviaRepository mockNumberTriviaRepository = MockNumberTriviaRepository();
   late GetRandomNumberTrivia usecases;
 
   setUp(
     () {
-      mockNumberTriviaRepository = MockNumberTriviaRepository();
       usecases = GetRandomNumberTrivia(mockNumberTriviaRepository);
     }
   );
