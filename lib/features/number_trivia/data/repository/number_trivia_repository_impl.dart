@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:number_trivia_app/core/platform/network_info.dart';
+import 'package:number_trivia_app/core/networkInfo/network_info.dart';
 import 'package:number_trivia_app/error/exceptions.dart';
 import 'package:number_trivia_app/features/number_trivia/data/datasources/number_trivia_local_data_source.dart';
 import 'package:number_trivia_app/features/number_trivia/data/datasources/number_trivia_remote_data_source.dart';
@@ -19,26 +19,37 @@ class NumberTriviaRepositoryImpl implements NumberTriviaRepository {
     required this.remoteDataSource,
     required this.networkInfo,
   });
-  //if device is connected
-  //then get fresh data from remote data source
-  // otherwise get data from local data source
-  @override
-  Future<Either<Failure, NumberTrivia>> getContreteNumberTrivia(
-      int number) async {
-    networkInfo.isConnected;
-    try {
-      final NumberTriviaModel numberTriviaModel =
-          await remoteDataSource.getConcreteNumberTrivia(number);
-      await localDataSource.cacheLastNumberTrivia(numberTriviaModel);
-      return Right(numberTriviaModel);
-    } on ServerException {
-      return Left(ServerFailure());
+
+  Future<Either<Failure, NumberTrivia>> _getTrivia(
+      Future<NumberTriviaModel> Function() getConcreteOrRandom) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final NumberTriviaModel numberTrivia = await getConcreteOrRandom();
+        await localDataSource.cacheLastNumberTrivia(numberTrivia);
+        return Right(numberTrivia);
+      } on ServerException {
+        return Left(ServerFailure());
+      }
+    } else {
+      try {
+        final NumberTriviaModel numberTrivia =
+            await localDataSource.getLastNumberTrivia();
+        return Right(numberTrivia);
+      } on CacheException {
+        return Left(CacheFailure());
+      }
     }
   }
 
   @override
-  Future<Either<Failure, NumberTrivia>> getRandomNumberTrivia() {
-    // TODO: implement getRandomNumberTrivia
-    throw UnimplementedError();
+  Future<Either<Failure, NumberTrivia>> getContreteNumberTrivia(
+      int number) async {
+    return await _getTrivia(
+        () => remoteDataSource.getConcreteNumberTrivia(number));
+  }
+
+  @override
+  Future<Either<Failure, NumberTrivia>> getRandomNumberTrivia() async {
+    return await _getTrivia(() => remoteDataSource.getRandomNumberTrivia());
   }
 }
