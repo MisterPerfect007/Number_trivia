@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:number_trivia_app/features/number_trivia/data/models/number_trivia_model.dart';
 import 'package:number_trivia_app/features/number_trivia/domain/entities/number_trivia.dart';
 
-import '../fixtures/load_fixture.dart';
+import '../../fixtures/load_fixture.dart';
 
 void main(){
   const  tNumberTriviaModel =  NumberTriviaModel(text: 'test', number: 0);
