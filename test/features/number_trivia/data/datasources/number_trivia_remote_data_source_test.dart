@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:number_trivia_app/features/number_trivia/data/datasources/number_trivia_remote_data_source.dart';
 import 'package:number_trivia_app/features/number_trivia/data/models/number_trivia_model.dart';
 
-import '../../fixtures/load_fixture.dart';
+import '../../../fixtures/load_fixture.dart';
 import 'number_trivia_remote_data_source_test.mocks.dart';
 
 @GenerateMocks([http.Client])
