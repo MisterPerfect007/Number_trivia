@@ -19,15 +19,27 @@ class NumberTriviaBloc extends Bloc<NumberTriviaEvent, NumberTriviaState> {
     required this.random,
     required this.inputConverter,
   }) : super(NumberTriviaInitial()) {
-
     on<NumberTriviaEvent>((event, emit) {
-      // TODO: implement event handler
+      if (event is GetTriviaForConcreteNumber) {
+        final eitherOuput = inputConverter.stringToInt(event.stringNumber);
+        eitherOuput
+            .fold((failure) => emit(const NumberTriviaError(message: 'Error')),
+                (number) async {
+          emit(NumberTriviaLoading());
+          final eitherGetTriviaCall = await concrete.call(Params(number));
+          eitherGetTriviaCall!.fold(
+              (_) => emit(const NumberTriviaError(message: 'message')),
+              (trivia) => emit(NumberTriviaLoaded(trivia)));
+        });
+      }
 
-      //Convert the stringNumber to int
-
-      //call the GetConcreteNumberTrivia
-
-      //emit the state
+      //==> event is GetTriviaForRandomNumber
+      //call the GetRandomNumberTrivia
+      //emit [NumberTriviaLoading]
+      //when success
+      // emit [NumberTriviaLoaded] state
+      //when failed
+      // emit [NumberTriviaError] state
     });
   }
 }
