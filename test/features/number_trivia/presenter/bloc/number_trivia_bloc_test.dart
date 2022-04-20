@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:number_trivia_app/core/usecases/usecase.dart';
 import 'package:number_trivia_app/core/util/input_converter.dart';
+import 'package:number_trivia_app/error/errors_message.dart';
 import 'package:number_trivia_app/error/failures.dart';
 import 'package:number_trivia_app/features/number_trivia/domain/entities/number_trivia.dart';
 import 'package:number_trivia_app/features/number_trivia/domain/usecases/get_concrete_number_trivia.dart';
@@ -29,6 +31,7 @@ void main() {
     numberTriviaBloc = NumberTriviaBloc(
         concrete: concrete, random: random, inputConverter: inputConverter);
   });
+  const numberTrivia = NumberTrivia(text: 'text', number: 1);
 
   group('GetTriviaForConcreteNumber : ', () {
     test('Should initial State be [NumberTriviainitial]', () {
@@ -37,7 +40,6 @@ void main() {
 
     const String tNumberString = "1";
     const int tNumber = 1;
-    const numberTrivia = NumberTrivia(text: 'text', number: 1);
 
     void whenCallToConcreteSucceeded() => when(concrete.call(any))
         .thenAnswer((_) async => const Right(numberTrivia));
@@ -66,7 +68,7 @@ void main() {
         build: () => numberTriviaBloc,
         act: (bloc) =>
             bloc.add(const GetTriviaForConcreteNumber(tNumberString)),
-        expect: () => [const NumberTriviaError(message: 'Erro')]);
+        expect: () => [const NumberTriviaError(message: inputErrorMessage)]);
 
     blocTest<NumberTriviaBloc, NumberTriviaState>(
       '''Should emit [NumberTriviaLoading] 
@@ -108,7 +110,8 @@ void main() {
         expect: () =>
             [NumberTriviaLoading(), const NumberTriviaLoaded(numberTrivia)]);
     blocTest<NumberTriviaBloc, NumberTriviaState>(
-        '''Should emit [NumberTriviaError] when call to getConcreteNumberTrivia failed''',
+        '''Should emit [NumberTriviaError] when call to 
+        getConcreteNumberTrivia failed''',
         setUp: () {
           whenCallToInputConverterSucceeded();
           when(concrete.call(const Params(tNumber)))
@@ -120,16 +123,95 @@ void main() {
         // skip: 1,
         expect: () => [
               NumberTriviaLoading(),
-              const NumberTriviaError(message: '')
+              const NumberTriviaError(message: cacheErrorMessage)
             ]);
-    test('sss', () async {
-      whenCallToInputConverterSucceeded();
-          when(concrete.call(any))
-              .thenAnswer((_) async => Left(CacheFailure()));
-      numberTriviaBloc.add(const GetTriviaForConcreteNumber(tNumberString));
-      await untilCalled(concrete.call(const Params(tNumber)));
-
-      verify(concrete.call(const Params(tNumber)));
-    });
+    blocTest<NumberTriviaBloc, NumberTriviaState>(
+        '''Should emit [NumberTriviaError] with the correct 
+        message when call to getConcreteNumberTrivia failed''',
+        setUp: () {
+          whenCallToInputConverterSucceeded();
+          when(concrete.call(const Params(tNumber)))
+              .thenAnswer((_) async => Left(ServerFailure()));
+        },
+        build: () => numberTriviaBloc,
+        act: (bloc) =>
+            bloc.add(const GetTriviaForConcreteNumber(tNumberString)),
+        // skip: 1,
+        expect: () => [
+              NumberTriviaLoading(),
+              const NumberTriviaError(message: serverErrorMessage)
+            ]);
+  });
+  group('GetTriviaForConcreteNumber : ', () {
+    void whenCallToRandomsucceeded() => when(random.call(NoParams()))
+        .thenAnswer((_) async => const Right(numberTrivia));
+    blocTest<NumberTriviaBloc, NumberTriviaState>(
+        '''Should emit [NumberTriviaLoading] when the 
+      GetTriviaForRandomNumber event is trigger''',
+        setUp: () {
+          whenCallToRandomsucceeded();
+        },
+        build: () => numberTriviaBloc,
+        act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
+        expect: () => [
+          NumberTriviaLoading(),
+          const NumberTriviaLoaded(numberTrivia),
+        ]);
+    blocTest<NumberTriviaBloc, NumberTriviaState>(
+        '''Should make a call to the GetRandomNumberTrivia 
+      usecase when the GetTriviaForRandomNumber event is trigger''',
+        setUp: () {
+          whenCallToRandomsucceeded();
+        },
+        build: () => numberTriviaBloc,
+        act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
+        verify: (_) {
+          verify(random.call(NoParams())).called(1);
+        });
+    blocTest<NumberTriviaBloc, NumberTriviaState>(
+        '''Should emit [NumberTriviaError] 
+        with serverErrorMessage when a ServerFailure is 
+        return from GetRandomNumberTrivia call''',
+        setUp: () {
+          when(random.call(NoParams())).thenAnswer((_) async => Left(ServerFailure()));
+        },
+        build: () => numberTriviaBloc,
+        act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
+        expect: () => [
+          NumberTriviaLoading(),
+          const NumberTriviaError(message: serverErrorMessage),
+          
+        ]
+    );
+    blocTest<NumberTriviaBloc, NumberTriviaState>(
+        '''Should emit [NumberTriviaError] 
+        with cacheErrorMessage when a CacheFailure is 
+        return from GetRandomNumberTrivia call''',
+        setUp: () {
+          when(random.call(NoParams())).thenAnswer((_) async => Left(CacheFailure()));
+        },
+        build: () => numberTriviaBloc,
+        act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
+        expect: () => [
+          NumberTriviaLoading(),
+          const NumberTriviaError(message: cacheErrorMessage),
+          
+        ]
+    );
+    blocTest<NumberTriviaBloc, NumberTriviaState>(
+        '''Should emit [NumberTriviaLoaded] 
+        when a NumberTrivia is 
+        return from GetRandomNumberTrivia call''',
+        setUp: () {
+          whenCallToRandomsucceeded();
+        },
+        build: () => numberTriviaBloc,
+        act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
+        expect: () => [
+          NumberTriviaLoading(),
+          const NumberTriviaLoaded(numberTrivia),
+          
+        ]
+    );
   });
 }
