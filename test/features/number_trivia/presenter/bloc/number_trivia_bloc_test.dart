@@ -154,9 +154,9 @@ void main() {
         build: () => numberTriviaBloc,
         act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
         expect: () => [
-          NumberTriviaLoading(),
-          const NumberTriviaLoaded(numberTrivia),
-        ]);
+              NumberTriviaLoading(),
+              const NumberTriviaLoaded(numberTrivia),
+            ]);
     blocTest<NumberTriviaBloc, NumberTriviaState>(
         '''Should make a call to the GetRandomNumberTrivia 
       usecase when the GetTriviaForRandomNumber event is trigger''',
@@ -173,31 +173,29 @@ void main() {
         with serverErrorMessage when a ServerFailure is 
         return from GetRandomNumberTrivia call''',
         setUp: () {
-          when(random.call(NoParams())).thenAnswer((_) async => Left(ServerFailure()));
+          when(random.call(NoParams()))
+              .thenAnswer((_) async => Left(ServerFailure()));
         },
         build: () => numberTriviaBloc,
         act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
         expect: () => [
-          NumberTriviaLoading(),
-          const NumberTriviaError(message: serverErrorMessage),
-          
-        ]
-    );
+              NumberTriviaLoading(),
+              const NumberTriviaError(message: serverErrorMessage),
+            ]);
     blocTest<NumberTriviaBloc, NumberTriviaState>(
         '''Should emit [NumberTriviaError] 
         with cacheErrorMessage when a CacheFailure is 
         return from GetRandomNumberTrivia call''',
         setUp: () {
-          when(random.call(NoParams())).thenAnswer((_) async => Left(CacheFailure()));
+          when(random.call(NoParams()))
+              .thenAnswer((_) async => Left(CacheFailure()));
         },
         build: () => numberTriviaBloc,
         act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
         expect: () => [
-          NumberTriviaLoading(),
-          const NumberTriviaError(message: cacheErrorMessage),
-          
-        ]
-    );
+              NumberTriviaLoading(),
+              const NumberTriviaError(message: cacheErrorMessage),
+            ]);
     blocTest<NumberTriviaBloc, NumberTriviaState>(
         '''Should emit [NumberTriviaLoaded] 
         when a NumberTrivia is 
@@ -208,10 +206,8 @@ void main() {
         build: () => numberTriviaBloc,
         act: (bloc) => bloc.add(GetTriviaForRandomNumber()),
         expect: () => [
-          NumberTriviaLoading(),
-          const NumberTriviaLoaded(numberTrivia),
-          
-        ]
-    );
+              NumberTriviaLoading(),
+              const NumberTriviaLoaded(numberTrivia),
+            ]);
   });
 }
