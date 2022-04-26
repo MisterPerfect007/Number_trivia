@@ -23,22 +23,22 @@ class NumberTriviaBloc extends Bloc<NumberTriviaEvent, NumberTriviaState> {
     required this.inputConverter,
   }) : super(NumberTriviaInitial()) {
     on<NumberTriviaEvent>((event, emit) async {
+      emit(NumberTriviaLoading());
+      
       if (event is GetTriviaForConcreteNumber) {
         final intOrFailure = inputConverter.stringToInt(event.stringNumber);
-        intOrFailure.fold(
-            (failure) =>
-                emit(const NumberTriviaError(message: inputErrorMessage)),
-            (number) async {
-          emit(NumberTriviaLoading());
-          final triviaOrFailure = await concrete.call(Params(number));
-          triviaOrFailure!.fold(
-              (failure) => emit(
-                  NumberTriviaError(message: _cacheOrServerMessage(failure))),
-              (trivia) => emit(NumberTriviaLoaded(trivia)));
-        });
+        if(intOrFailure.isLeft()){
+          intOrFailure.leftMap((failure) => emit(const NumberTriviaError(message: inputErrorMessage)));
+        } else {
+          int number = intOrFailure.getOrElse(() => 0);
+          final triviaOrfailure = await concrete.call(Params(number));
+          triviaOrfailure!.fold(
+            (failure) => emit(NumberTriviaError(message: _cacheOrServerMessage(failure))), 
+            (trivia) => emit(NumberTriviaLoaded(trivia))
+          );
+        }
       }
       if (event is GetTriviaForRandomNumber) {
-        emit(NumberTriviaLoading());
         final failureOrTrivia = await random.call(NoParams());
         failureOrTrivia!.fold(
             (failure) => emit(

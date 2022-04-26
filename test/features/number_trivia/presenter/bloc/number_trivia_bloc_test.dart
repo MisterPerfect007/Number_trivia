@@ -60,7 +60,7 @@ void main() {
     });
 
     blocTest<NumberTriviaBloc, NumberTriviaState>(
-        'Should emit [NumberTriviaError] when inputConverter throws a Failure',
+        'Should emit [NumberTriviaLoading, NumberTriviaError] when inputConverter throws a Failure',
         setUp: () {
           when(inputConverter.stringToInt(any))
               .thenReturn(Left(InputConverterFailure()));
@@ -68,7 +68,7 @@ void main() {
         build: () => numberTriviaBloc,
         act: (bloc) =>
             bloc.add(const GetTriviaForConcreteNumber(tNumberString)),
-        expect: () => [const NumberTriviaError(message: inputErrorMessage)]);
+        expect: () => [NumberTriviaLoading() , const NumberTriviaError(message: inputErrorMessage)]);
 
     blocTest<NumberTriviaBloc, NumberTriviaState>(
       '''Should emit [NumberTriviaLoading] 
